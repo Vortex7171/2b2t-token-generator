@@ -1,14 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>2b2t Token Generator</title>
-</head>
-<body>
-  <h1>2b2t Token Generator</h1>
-  <p>Click below to log in and get your Minecraft token:</p>
-  <button id="loginBtn">Get Token</button>
-  <pre id="output"></pre>
-  <script src="script.js"></script>
-</body>
+<html>
+  <head>
+    <title>2b2t Token Generator</title>
+    <style>
+      body {
+        font-family: monospace;
+        background: #111;
+        color: #0f0;
+        padding: 2em;
+      }
+      button {
+        font-size: 18px;
+        padding: 10px;
+        cursor: pointer;
+        background: #0f0;
+        color: #000;
+        border: none;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin-top: 20px;
+        background: #222;
+        padding: 1em;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>2b2t Queue Bot Token</h1>
+    <p>Click below to log in with Microsoft and get your Minecraft token:</p>
+    <button onclick="startAuth()">Get Token</button>
+    <pre id="output"></pre>
+    <script src="script.js"></script>
+  </body>
 </html>
