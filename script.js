@@ -1,4 +1,4 @@
-const CLIENT_ID = 'YOUR_CLIENT_ID_HERE';
+const CLIENT_ID = '89d11ef0-9b05-4295-83f5-06ef7af5a061';
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 
 const loginBtn = document.getElementById('loginBtn');
